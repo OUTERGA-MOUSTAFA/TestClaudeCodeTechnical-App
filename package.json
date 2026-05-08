@@ -12,10 +12,10 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:migrate": "pnpm --filter @hc/server prisma migrate dev",
-    "db:seed": "pnpm --filter @hc/server prisma db seed",
-    "db:reset": "pnpm --filter @hc/server prisma migrate reset --force",
-    "db:studio": "pnpm --filter @hc/server prisma studio"
+    "db:migrate": "pnpm --filter @hc/server exec prisma migrate dev",
+    "db:seed": "pnpm --filter @hc/server exec prisma db seed",
+    "db:reset": "pnpm --filter @hc/server exec prisma migrate reset --force",
+    "db:studio": "pnpm --filter @hc/server exec prisma studio"
   },
   "engines": {
     "node": ">=24",

@@ -105,7 +105,7 @@ adminRouter.patch(
         email?: string;
         firstName?: string;
         lastName?: string;
-        role?: 'ADMIN' | 'SECRETARY' | 'PATIENT';
+        role?: 'ADMIN' | 'SECRETARY' | 'DOCTOR' | 'PATIENT';
         isActive?: boolean;
         passwordHash?: string;
       } = {};

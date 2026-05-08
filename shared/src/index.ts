@@ -1,13 +1,19 @@
 import { z } from 'zod';
 
 // ─── Enums (mirror Prisma) ──────────────────────────────────────────────────
-export const RoleSchema = z.enum(['ADMIN', 'SECRETARY', 'PATIENT']);
+export const RoleSchema = z.enum(['ADMIN', 'SECRETARY', 'DOCTOR', 'PATIENT']);
 export type Role = z.infer<typeof RoleSchema>;
 
 export const GenderSchema = z.enum(['MALE', 'FEMALE', 'OTHER']);
 export type Gender = z.infer<typeof GenderSchema>;
 
-export const AppointmentStatusSchema = z.enum(['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW']);
+export const AppointmentStatusSchema = z.enum([
+  'PENDING',
+  'SCHEDULED',
+  'COMPLETED',
+  'CANCELLED',
+  'NO_SHOW',
+]);
 export type AppointmentStatus = z.infer<typeof AppointmentStatusSchema>;
 
 // ─── Common ─────────────────────────────────────────────────────────────────
@@ -145,6 +151,7 @@ export const AppointmentSchema = z.object({
   status: AppointmentStatusSchema,
   reason: z.string().nullable(),
   notes: z.string().nullable(),
+  rejectionReason: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -207,3 +214,76 @@ export const UpdateMedicalRecordInputSchema = z
   })
   .partial();
 export type UpdateMedicalRecordInput = z.infer<typeof UpdateMedicalRecordInputSchema>;
+
+// ─── Doctor (full schema for CRUD) ──────────────────────────────────────────
+export const DoctorSchema = z.object({
+  id: UuidSchema,
+  userId: UuidSchema,
+  specialty: z.string(),
+  licenseNumber: z.string(),
+  phone: z.string().nullable(),
+  bio: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type Doctor = z.infer<typeof DoctorSchema>;
+
+export const CreateDoctorInputSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).max(72),
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
+  specialty: z.string().min(1).max(200),
+  licenseNumber: z.string().min(1).max(100),
+  phone: z.string().max(30).optional(),
+  bio: z.string().max(2000).optional(),
+});
+export type CreateDoctorInput = z.infer<typeof CreateDoctorInputSchema>;
+
+export const UpdateDoctorInputSchema = z
+  .object({
+    firstName: z.string().min(1).max(100),
+    lastName: z.string().min(1).max(100),
+    specialty: z.string().min(1).max(200),
+    licenseNumber: z.string().min(1).max(100),
+    phone: z.string().max(30).nullable(),
+    bio: z.string().max(2000).nullable(),
+  })
+  .partial();
+export type UpdateDoctorInput = z.infer<typeof UpdateDoctorInputSchema>;
+
+// ─── Appointment lifecycle (accept / refuse) ────────────────────────────────
+export const RefuseAppointmentInputSchema = z.object({
+  rejectionReason: z.string().min(1).max(1000),
+});
+export type RefuseAppointmentInput = z.infer<typeof RefuseAppointmentInputSchema>;
+
+// ─── Booking flows ──────────────────────────────────────────────────────────
+export const PublicBookingInputSchema = z.object({
+  email: z.string().email(),
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}/),
+  gender: GenderSchema,
+  phone: z.string().min(1).max(30),
+  doctorId: UuidSchema,
+  scheduledAt: z.string().datetime(),
+  reason: z.string().max(500).optional(),
+});
+export type PublicBookingInput = z.infer<typeof PublicBookingInputSchema>;
+
+export const PatientBookingInputSchema = z.object({
+  doctorId: UuidSchema,
+  scheduledAt: z.string().datetime(),
+  reason: z.string().max(500).optional(),
+});
+export type PatientBookingInput = z.infer<typeof PatientBookingInputSchema>;
+
+export const PublicDoctorSchema = z.object({
+  id: UuidSchema,
+  specialty: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  bio: z.string().nullable(),
+});
+export type PublicDoctor = z.infer<typeof PublicDoctorSchema>;

@@ -6,6 +6,7 @@ import { authRouter } from './routes/auth.js';
 import { adminRouter } from './routes/admin.js';
 import { secretaryRouter } from './routes/secretary.js';
 import { patientRouter } from './routes/patient.js';
+import { publicRouter } from './routes/public.js';
 import { errorHandler, notFoundHandler } from './errors.js';
 
 export function createApp(): Express {
@@ -15,6 +16,7 @@ export function createApp(): Express {
   app.use(express.json());
 
   app.use('/api/health', healthRouter);
+  app.use('/api/public', publicRouter);
   app.use('/api/auth', authRouter);
   app.use('/api/admin', adminRouter);
   app.use('/api/secretary', secretaryRouter);

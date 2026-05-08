@@ -1,5 +1,9 @@
 import { Router } from 'express';
-import { IdParamsSchema, PaginationQuerySchema } from '@hc/shared';
+import {
+  IdParamsSchema,
+  PaginationQuerySchema,
+  PatientBookingInputSchema,
+} from '@hc/shared';
 import { prisma } from '../prisma.js';
 import { HttpError } from '../errors.js';
 import { validate } from '../validate.js';
@@ -80,6 +84,56 @@ patientRouter.get(
       if (!appt) throw new HttpError(404, 'Appointment not found');
       if (appt.patientId !== patient.id) throw new HttpError(403, 'Not your appointment');
       res.json(appt);
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+patientRouter.get('/doctors', async (_req, res, next) => {
+  try {
+    const doctors = await prisma.doctor.findMany({
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        specialty: true,
+        bio: true,
+        user: { select: { firstName: true, lastName: true } },
+      },
+    });
+    res.json({
+      items: doctors.map((d) => ({
+        id: d.id,
+        specialty: d.specialty,
+        bio: d.bio,
+        firstName: d.user.firstName,
+        lastName: d.user.lastName,
+      })),
+    });
+  } catch (e) {
+    next(e);
+  }
+});
+
+patientRouter.post(
+  '/appointments',
+  validate('body', PatientBookingInputSchema),
+  async (req, res, next) => {
+    try {
+      const body = req.body as import('@hc/shared').PatientBookingInput;
+      const patient = await loadOwnPatient(req.user!.sub);
+      const doctor = await prisma.doctor.findUnique({ where: { id: body.doctorId } });
+      if (!doctor) throw new HttpError(404, 'Doctor not found');
+      const appt = await prisma.appointment.create({
+        data: {
+          patientId: patient.id,
+          doctorId: body.doctorId,
+          scheduledAt: new Date(body.scheduledAt),
+          reason: body.reason,
+          status: 'PENDING',
+        },
+      });
+      res.status(201).json(appt);
     } catch (e) {
       next(e);
     }

@@ -14,11 +14,9 @@ import { authenticate } from '../auth/middleware.js';
 
 export const authRouter: Router = Router();
 
-function userPayload(u: {
-  id: string;
-  email: string;
-  role: 'ADMIN' | 'SECRETARY' | 'PATIENT';
-}): JwtPayload {
+import type { Role } from '@hc/shared';
+
+function userPayload(u: { id: string; email: string; role: Role }): JwtPayload {
   return { sub: u.id, email: u.email, role: u.role };
 }
 
@@ -27,7 +25,7 @@ function publicUser(u: {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'ADMIN' | 'SECRETARY' | 'PATIENT';
+  role: Role;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

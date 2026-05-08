@@ -1,11 +1,14 @@
 import { Router } from 'express';
 import {
   CreateAppointmentInputSchema,
+  CreateDoctorInputSchema,
   CreateMedicalRecordInputSchema,
   CreatePatientInputSchema,
   IdParamsSchema,
   PaginationQuerySchema,
+  RefuseAppointmentInputSchema,
   UpdateAppointmentInputSchema,
+  UpdateDoctorInputSchema,
   UpdateMedicalRecordInputSchema,
   UpdatePatientInputSchema,
 } from '@hc/shared';
@@ -249,7 +252,7 @@ secretaryRouter.patch(
       const data: {
         scheduledAt?: Date;
         durationMinutes?: number;
-        status?: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
+        status?: 'PENDING' | 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
         reason?: string | null;
         notes?: string | null;
       } = {};
@@ -380,6 +383,188 @@ secretaryRouter.delete(
     try {
       await prisma.medicalRecord.delete({ where: { id: req.params.id } });
       res.status(204).end();
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+// ─── Doctors CRUD ───────────────────────────────────────────────────────────
+secretaryRouter.get(
+  '/doctors',
+  validate('query', PaginationQuerySchema),
+  async (req, res, next) => {
+    try {
+      const { search, take, skip } = req.query as unknown as {
+        search?: string;
+        take: number;
+        skip: number;
+      };
+      const where = search
+        ? {
+            OR: [
+              { specialty: { contains: search, mode: 'insensitive' as const } },
+              { user: { firstName: { contains: search, mode: 'insensitive' as const } } },
+              { user: { lastName: { contains: search, mode: 'insensitive' as const } } },
+            ],
+          }
+        : undefined;
+      const [items, total] = await Promise.all([
+        prisma.doctor.findMany({
+          where,
+          take,
+          skip,
+          orderBy: { createdAt: 'desc' },
+          include: { user: { select: { email: true, firstName: true, lastName: true } } },
+        }),
+        prisma.doctor.count({ where }),
+      ]);
+      res.json({ items, total, take, skip });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+secretaryRouter.get('/doctors/:id', validate('params', IdParamsSchema), async (req, res, next) => {
+  try {
+    const doctor = await prisma.doctor.findUnique({
+      where: { id: req.params.id },
+      include: { user: { select: { email: true, firstName: true, lastName: true } } },
+    });
+    if (!doctor) throw new HttpError(404, 'Doctor not found');
+    res.json(doctor);
+  } catch (e) {
+    next(e);
+  }
+});
+
+secretaryRouter.post('/doctors', validate('body', CreateDoctorInputSchema), async (req, res, next) => {
+  try {
+    const body = req.body as import('@hc/shared').CreateDoctorInput;
+    const exists = await prisma.user.findUnique({ where: { email: body.email } });
+    if (exists) throw new HttpError(409, 'Email already in use');
+    const dup = await prisma.doctor.findUnique({ where: { licenseNumber: body.licenseNumber } });
+    if (dup) throw new HttpError(409, 'License number already in use');
+    const passwordHash = await hashPassword(body.password);
+    const user = await prisma.user.create({
+      data: {
+        email: body.email,
+        passwordHash,
+        firstName: body.firstName,
+        lastName: body.lastName,
+        role: 'DOCTOR',
+        doctor: {
+          create: {
+            specialty: body.specialty,
+            licenseNumber: body.licenseNumber,
+            phone: body.phone,
+            bio: body.bio,
+          },
+        },
+      },
+      include: { doctor: true },
+    });
+    res.status(201).json(user.doctor);
+  } catch (e) {
+    next(e);
+  }
+});
+
+secretaryRouter.patch(
+  '/doctors/:id',
+  validate('params', IdParamsSchema),
+  validate('body', UpdateDoctorInputSchema),
+  async (req, res, next) => {
+    try {
+      const body = req.body as import('@hc/shared').UpdateDoctorInput;
+      const doctor = await prisma.doctor.findUnique({ where: { id: req.params.id } });
+      if (!doctor) throw new HttpError(404, 'Doctor not found');
+
+      const userData: { firstName?: string; lastName?: string } = {};
+      if (body.firstName !== undefined) userData.firstName = body.firstName;
+      if (body.lastName !== undefined) userData.lastName = body.lastName;
+
+      const doctorData: {
+        specialty?: string;
+        licenseNumber?: string;
+        phone?: string | null;
+        bio?: string | null;
+      } = {};
+      if (body.specialty !== undefined) doctorData.specialty = body.specialty;
+      if (body.licenseNumber !== undefined) doctorData.licenseNumber = body.licenseNumber;
+      if (body.phone !== undefined) doctorData.phone = body.phone;
+      if (body.bio !== undefined) doctorData.bio = body.bio;
+
+      const updated = await prisma.doctor.update({
+        where: { id: doctor.id },
+        data: {
+          ...doctorData,
+          ...(Object.keys(userData).length > 0 ? { user: { update: userData } } : {}),
+        },
+        include: { user: { select: { email: true, firstName: true, lastName: true } } },
+      });
+      res.json(updated);
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+secretaryRouter.delete(
+  '/doctors/:id',
+  validate('params', IdParamsSchema),
+  async (req, res, next) => {
+    try {
+      const doctor = await prisma.doctor.findUnique({ where: { id: req.params.id } });
+      if (!doctor) throw new HttpError(404, 'Doctor not found');
+      await prisma.user.delete({ where: { id: doctor.userId } });
+      res.status(204).end();
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+// ─── Appointment lifecycle: accept / refuse with justification ──────────────
+secretaryRouter.patch(
+  '/appointments/:id/accept',
+  validate('params', IdParamsSchema),
+  async (req, res, next) => {
+    try {
+      const appt = await prisma.appointment.findUnique({ where: { id: req.params.id } });
+      if (!appt) throw new HttpError(404, 'Appointment not found');
+      if (appt.status !== 'PENDING') {
+        throw new HttpError(409, 'Only PENDING appointments can be accepted');
+      }
+      const updated = await prisma.appointment.update({
+        where: { id: appt.id },
+        data: { status: 'SCHEDULED', rejectionReason: null },
+      });
+      res.json(updated);
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+secretaryRouter.patch(
+  '/appointments/:id/refuse',
+  validate('params', IdParamsSchema),
+  validate('body', RefuseAppointmentInputSchema),
+  async (req, res, next) => {
+    try {
+      const body = req.body as import('@hc/shared').RefuseAppointmentInput;
+      const appt = await prisma.appointment.findUnique({ where: { id: req.params.id } });
+      if (!appt) throw new HttpError(404, 'Appointment not found');
+      if (appt.status !== 'PENDING') {
+        throw new HttpError(409, 'Only PENDING appointments can be refused');
+      }
+      const updated = await prisma.appointment.update({
+        where: { id: appt.id },
+        data: { status: 'CANCELLED', rejectionReason: body.rejectionReason },
+      });
+      res.json(updated);
     } catch (e) {
       next(e);
     }

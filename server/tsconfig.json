@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "sourceMap": true,
+    "declaration": false,
+    "noEmit": true
+  },
+  "include": ["src/**/*", "tests/**/*", "prisma/**/*", "vitest.config.ts"]
+}

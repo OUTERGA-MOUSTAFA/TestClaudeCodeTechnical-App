@@ -1,0 +1,10 @@
+packages:
+  - 'server'
+  - 'client'
+  - 'shared'
+allowBuilds:
+  '@prisma/client': true
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+  bcrypt: true

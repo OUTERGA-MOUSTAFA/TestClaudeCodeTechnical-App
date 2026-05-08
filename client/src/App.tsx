@@ -1,10 +1,38 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Layout } from '@/components/Layout';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import Landing from '@/pages/Landing';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import AdminDashboard from '@/pages/dashboard/Admin';
+import SecretaryDashboard from '@/pages/dashboard/Secretary';
+import PatientDashboard from '@/pages/dashboard/Patient';
+import Forbidden from '@/pages/Forbidden';
+import NotFound from '@/pages/NotFound';
+
 export default function App() {
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-8">
-      <div className="max-w-xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl">
-        <h1 className="text-3xl font-bold mb-2 text-blue-400">HealthCare-App</h1>
-        <p className="text-slate-400">Scaffold ready. UI coming in ÉTAPE 9.</p>
-      </div>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index element={<Landing />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="403" element={<Forbidden />} />
+
+          <Route element={<ProtectedRoute roles={['ADMIN']} />}>
+            <Route path="dashboard/admin" element={<AdminDashboard />} />
+          </Route>
+          <Route element={<ProtectedRoute roles={['ADMIN', 'SECRETARY']} />}>
+            <Route path="dashboard/secretary" element={<SecretaryDashboard />} />
+          </Route>
+          <Route element={<ProtectedRoute roles={['PATIENT']} />}>
+            <Route path="dashboard/patient" element={<PatientDashboard />} />
+          </Route>
+
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }

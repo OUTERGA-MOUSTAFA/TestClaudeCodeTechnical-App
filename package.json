@@ -1,0 +1,25 @@
+{
+  "name": "testclaudecodetechnical-app",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@11.0.8",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./server\" --filter \"./client\" dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "prisma:generate": "pnpm --filter server exec prisma generate",
+    "prisma:migrate": "pnpm --filter server exec prisma migrate dev",
+    "prisma:studio": "pnpm --filter server exec prisma studio"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=10"
+  }
+}

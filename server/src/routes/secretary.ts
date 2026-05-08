@@ -58,24 +58,20 @@ secretaryRouter.get(
   },
 );
 
-secretaryRouter.get(
-  '/patients/:id',
-  validate('params', IdParamsSchema),
-  async (req, res, next) => {
-    try {
-      const patient = await prisma.patient.findUnique({
-        where: { id: req.params.id },
-        include: {
-          user: { select: { email: true, firstName: true, lastName: true, isActive: true } },
-        },
-      });
-      if (!patient) throw new HttpError(404, 'Patient not found');
-      res.json(patient);
-    } catch (e) {
-      next(e);
-    }
-  },
-);
+secretaryRouter.get('/patients/:id', validate('params', IdParamsSchema), async (req, res, next) => {
+  try {
+    const patient = await prisma.patient.findUnique({
+      where: { id: req.params.id },
+      include: {
+        user: { select: { email: true, firstName: true, lastName: true, isActive: true } },
+      },
+    });
+    if (!patient) throw new HttpError(404, 'Patient not found');
+    res.json(patient);
+  } catch (e) {
+    next(e);
+  }
+});
 
 secretaryRouter.post(
   '/patients',
@@ -296,7 +292,9 @@ secretaryRouter.get(
           skip,
           orderBy: { recordedAt: 'desc' },
           include: {
-            patient: { select: { id: true, user: { select: { firstName: true, lastName: true } } } },
+            patient: {
+              select: { id: true, user: { select: { firstName: true, lastName: true } } },
+            },
             doctor: { select: { id: true, specialty: true } },
           },
         }),

@@ -20,7 +20,7 @@ export default function NotFound() {
       </motion.div>
       <h1 className="text-3xl font-bold">404 — Page introuvable</h1>
       <p className="text-muted-foreground">
-        L'adresse demandée n'existe pas. Retournez à un endroit connu.
+        L’adresse demandée n’existe pas. Retournez à un endroit connu.
       </p>
       <Button asChild>
         <Link to="/">Accueil</Link>

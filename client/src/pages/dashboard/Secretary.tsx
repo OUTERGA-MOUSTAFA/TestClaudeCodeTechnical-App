@@ -51,9 +51,7 @@ export default function SecretaryDashboard() {
     >
       <div>
         <h1 className="text-2xl font-bold">Dashboard Secrétaire</h1>
-        <p className="text-muted-foreground text-sm">
-          Patients et rendez-vous de la clinique.
-        </p>
+        <p className="text-muted-foreground text-sm">Patients et rendez-vous de la clinique.</p>
       </div>
 
       {error && (
@@ -131,8 +129,7 @@ export default function SecretaryDashboard() {
                       {a.patient.user.firstName} {a.patient.user.lastName}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(a.scheduledAt).toLocaleString('fr-FR')} ·{' '}
-                      {a.doctor.specialty}
+                      {new Date(a.scheduledAt).toLocaleString('fr-FR')} · {a.doctor.specialty}
                     </p>
                   </div>
                   <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">

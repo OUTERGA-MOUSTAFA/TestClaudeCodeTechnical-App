@@ -27,7 +27,9 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   const code = (err as { code?: string }).code;
   if (code === 'P2025') return res.status(404).json({ error: 'Not Found' });
   if (code === 'P2002')
-    return res.status(409).json({ error: 'Unique constraint violation', details: (err as { meta?: unknown }).meta });
+    return res
+      .status(409)
+      .json({ error: 'Unique constraint violation', details: (err as { meta?: unknown }).meta });
 
   console.error('[server] unhandled error', err);
   res.status(500).json({ error: 'Internal Server Error' });

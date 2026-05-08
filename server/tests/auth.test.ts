@@ -100,9 +100,7 @@ describe('POST /api/auth/refresh', () => {
   });
 
   it('returns 401 for invalid refresh token', async () => {
-    const res = await request(app)
-      .post('/api/auth/refresh')
-      .send({ refreshToken: 'garbage' });
+    const res = await request(app).post('/api/auth/refresh').send({ refreshToken: 'garbage' });
     expect(res.status).toBe(401);
   });
 });

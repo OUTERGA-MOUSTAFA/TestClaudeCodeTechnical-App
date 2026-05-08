@@ -16,10 +16,10 @@ export default function Forbidden() {
       </div>
       <h1 className="text-3xl font-bold">403 — Accès refusé</h1>
       <p className="text-muted-foreground">
-        Vous n'avez pas l'autorisation de consulter cette page.
+        Vous n’avez pas l’autorisation de consulter cette page.
       </p>
       <Button asChild>
-        <Link to="/">Retour à l'accueil</Link>
+        <Link to="/">Retour à l’accueil</Link>
       </Button>
     </motion.div>
   );

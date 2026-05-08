@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+.vite
+coverage
+pnpm-lock.yaml
+server/prisma/migrations
+*.min.js
+*.min.css

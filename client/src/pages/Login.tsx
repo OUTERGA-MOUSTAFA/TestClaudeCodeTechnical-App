@@ -83,7 +83,7 @@ export default function Login() {
             <p className="text-sm text-muted-foreground text-center">
               Pas de compte ?{' '}
               <Link to="/register" className="text-primary hover:underline">
-                S'inscrire
+                S’inscrire
               </Link>
             </p>
           </form>

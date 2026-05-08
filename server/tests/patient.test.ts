@@ -3,12 +3,7 @@ import request from 'supertest';
 import type { Express } from 'express';
 import { createApp } from '../src/app.js';
 import { prisma } from '../src/prisma.js';
-import {
-  bearer,
-  createDoctorUser,
-  createPatientUser,
-  type SeededUser,
-} from './helpers.js';
+import { bearer, createDoctorUser, createPatientUser, type SeededUser } from './helpers.js';
 
 let app: Express;
 beforeAll(() => {

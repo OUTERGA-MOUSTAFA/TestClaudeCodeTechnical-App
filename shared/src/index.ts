@@ -7,12 +7,7 @@ export type Role = z.infer<typeof RoleSchema>;
 export const GenderSchema = z.enum(['MALE', 'FEMALE', 'OTHER']);
 export type Gender = z.infer<typeof GenderSchema>;
 
-export const AppointmentStatusSchema = z.enum([
-  'SCHEDULED',
-  'COMPLETED',
-  'CANCELLED',
-  'NO_SHOW',
-]);
+export const AppointmentStatusSchema = z.enum(['SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW']);
 export type AppointmentStatus = z.infer<typeof AppointmentStatusSchema>;
 
 // ─── Common ─────────────────────────────────────────────────────────────────
@@ -45,7 +40,10 @@ export const RegisterInputSchema = z.object({
   password: z.string().min(8).max(72),
   firstName: z.string().min(1).max(100),
   lastName: z.string().min(1).max(100),
-  dateOfBirth: z.string().datetime().or(z.string().regex(/^\d{4}-\d{2}-\d{2}/)),
+  dateOfBirth: z
+    .string()
+    .datetime()
+    .or(z.string().regex(/^\d{4}-\d{2}-\d{2}/)),
   gender: GenderSchema,
   phone: z.string().max(30).optional(),
 });

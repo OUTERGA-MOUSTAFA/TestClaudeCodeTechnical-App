@@ -36,8 +36,7 @@ export default function Landing() {
           Plateforme de gestion clinique
         </div>
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-          Soins de santé{' '}
-          <span className="text-primary">modernes</span>, organisés.
+          Soins de santé <span className="text-primary">modernes</span>, organisés.
         </h1>
         <p className="text-lg text-muted-foreground">
           HealthCare connecte administrateurs, secrétaires et patients dans une seule plateforme

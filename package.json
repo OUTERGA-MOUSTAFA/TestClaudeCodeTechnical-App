@@ -12,6 +12,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "setup": "pwsh -File ./setup.ps1",
     "db:migrate": "pnpm --filter @hc/server exec prisma migrate dev",
     "db:seed": "pnpm --filter @hc/server exec prisma db seed",
     "db:reset": "pnpm --filter @hc/server exec prisma migrate reset --force",
@@ -20,5 +21,16 @@
   "engines": {
     "node": ">=24",
     "pnpm": ">=11"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.6.0",
+    "prettier": "^3.8.3",
+    "typescript-eslint": "^8.59.2"
   }
 }

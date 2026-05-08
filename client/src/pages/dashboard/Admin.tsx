@@ -52,7 +52,7 @@ export default function AdminDashboard() {
           Dashboard Administrateur
         </h1>
         <p className="text-muted-foreground text-sm">
-          Vue d'ensemble de la clinique et gestion des utilisateurs.
+          Vue d’ensemble de la clinique et gestion des utilisateurs.
         </p>
       </div>
 

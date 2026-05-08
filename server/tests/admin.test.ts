@@ -114,9 +114,7 @@ describe('DELETE /api/admin/users/:id', () => {
   });
 
   it('blocks self-deletion with 400', async () => {
-    const res = await request(app)
-      .delete(`/api/admin/users/${admin.id}`)
-      .set(bearer(admin.token));
+    const res = await request(app).delete(`/api/admin/users/${admin.id}`).set(bearer(admin.token));
     expect(res.status).toBe(400);
   });
 });

@@ -67,9 +67,7 @@ export default function PatientDashboard() {
     >
       <div>
         <h1 className="text-2xl font-bold">Mon espace patient</h1>
-        <p className="text-muted-foreground text-sm">
-          Vos rendez-vous et votre dossier médical.
-        </p>
+        <p className="text-muted-foreground text-sm">Vos rendez-vous et votre dossier médical.</p>
       </div>
 
       {error && (

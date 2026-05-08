@@ -6,3 +6,124 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  ADMIN
+  SECRETARY
+  PATIENT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  role         Role     @default(PATIENT)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  patient Patient?
+  doctor  Doctor?
+
+  @@index([role])
+  @@map("users")
+}
+
+model Patient {
+  id              String   @id @default(uuid())
+  userId          String   @unique @map("user_id")
+  dateOfBirth     DateTime @map("date_of_birth")
+  gender          Gender
+  phone           String?
+  address         String?
+  bloodType       String?  @map("blood_type")
+  allergies       String?
+  medicalHistory  String?  @map("medical_history")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments   Appointment[]
+  medicalRecords MedicalRecord[]
+
+  @@map("patients")
+}
+
+model Doctor {
+  id            String   @id @default(uuid())
+  userId        String   @unique @map("user_id")
+  specialty     String
+  licenseNumber String   @unique @map("license_number")
+  phone         String?
+  bio           String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments   Appointment[]
+  medicalRecords MedicalRecord[]
+
+  @@index([specialty])
+  @@map("doctors")
+}
+
+model Appointment {
+  id              String            @id @default(uuid())
+  patientId       String            @map("patient_id")
+  doctorId        String            @map("doctor_id")
+  scheduledAt     DateTime          @map("scheduled_at")
+  durationMinutes Int               @default(30) @map("duration_minutes")
+  status          AppointmentStatus @default(SCHEDULED)
+  reason          String?
+  notes           String?
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  patient        Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor         Doctor          @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  medicalRecords MedicalRecord[]
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([scheduledAt])
+  @@index([status])
+  @@map("appointments")
+}
+
+model MedicalRecord {
+  id            String   @id @default(uuid())
+  patientId     String   @map("patient_id")
+  doctorId      String   @map("doctor_id")
+  appointmentId String?  @map("appointment_id")
+  diagnosis     String
+  treatment     String?
+  prescription  String?
+  notes         String?
+  recordedAt    DateTime @default(now()) @map("recorded_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor      Doctor       @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([recordedAt])
+  @@map("medical_records")
+}

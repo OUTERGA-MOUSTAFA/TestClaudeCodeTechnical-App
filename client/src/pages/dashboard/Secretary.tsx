@@ -4,6 +4,7 @@ import { CalendarDays, Search, UserRound } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { RoleBadge } from '@/components/RoleBadge';
 import { api, ApiError } from '@/lib/api';
 
 interface PatientRow {
@@ -15,11 +16,19 @@ interface PatientRow {
 interface AppointmentRow {
   id: string;
   scheduledAt: string;
-  status: string;
+  status: 'PENDING' | 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
   reason: string | null;
   patient: { user: { firstName: string; lastName: string } };
   doctor: { specialty: string };
 }
+
+const STATUS_STYLES: Record<AppointmentRow['status'], string> = {
+  PENDING: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+  SCHEDULED: 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30',
+  COMPLETED: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+  CANCELLED: 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30',
+  NO_SHOW: 'bg-muted text-muted-foreground border-border',
+};
 
 export default function SecretaryDashboard() {
   const [patients, setPatients] = useState<PatientRow[] | null>(null);
@@ -93,11 +102,14 @@ export default function SecretaryDashboard() {
                     </p>
                     <p className="text-xs text-muted-foreground">{p.user.email}</p>
                   </div>
-                  {p.bloodType && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-                      {p.bloodType}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <RoleBadge role="PATIENT" />
+                    {p.bloodType && (
+                      <span className="text-xs px-2 py-0.5 rounded-full border bg-secondary text-secondary-foreground">
+                        {p.bloodType}
+                      </span>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -132,7 +144,9 @@ export default function SecretaryDashboard() {
                       {new Date(a.scheduledAt).toLocaleString('fr-FR')} · {a.doctor.specialty}
                     </p>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLES[a.status]}`}
+                  >
                     {a.status}
                   </span>
                 </li>

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/auth';
 import { ApiError } from '@/lib/api';
+import { dashboardForRole } from '@/lib/redirect';
 
 export default function Login() {
   const { login } = useAuth();
@@ -26,14 +27,7 @@ export default function Login() {
     setError(null);
     try {
       const user = await login(email, password);
-      const target =
-        from ??
-        (user.role === 'ADMIN'
-          ? '/dashboard/admin'
-          : user.role === 'SECRETARY'
-            ? '/dashboard/secretary'
-            : '/dashboard/patient');
-      navigate(target, { replace: true });
+      navigate(from ?? dashboardForRole(user.role), { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Login failed');
     } finally {

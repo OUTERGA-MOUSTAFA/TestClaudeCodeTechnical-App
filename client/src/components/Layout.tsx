@@ -4,18 +4,15 @@ import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
+import { RoleBadge } from '@/components/RoleBadge';
+import { dashboardForRole } from '@/lib/redirect';
 import { cn } from '@/lib/utils';
 
 export function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const dashboardPath =
-    user?.role === 'ADMIN'
-      ? '/dashboard/admin'
-      : user?.role === 'SECRETARY'
-        ? '/dashboard/secretary'
-        : '/dashboard/patient';
+  const dashboardPath = user ? dashboardForRole(user.role) : '/login';
 
   return (
     <div className="min-h-full flex flex-col">
@@ -43,8 +40,9 @@ export function Layout() {
                 >
                   Dashboard
                 </NavLink>
-                <span className="hidden sm:inline-block px-2 text-xs text-muted-foreground">
-                  {user.firstName} · {user.role}
+                <span className="hidden sm:inline-flex items-center gap-2 px-2 text-xs text-muted-foreground">
+                  {user.firstName} {user.lastName}
+                  <RoleBadge role={user.role} />
                 </span>
                 <Button
                   variant="ghost"

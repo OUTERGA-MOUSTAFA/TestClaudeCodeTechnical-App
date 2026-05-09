@@ -6,6 +6,7 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import AdminDashboard from '@/pages/dashboard/Admin';
 import SecretaryDashboard from '@/pages/dashboard/Secretary';
+import DoctorDashboard from '@/pages/dashboard/Doctor';
 import PatientDashboard from '@/pages/dashboard/Patient';
 import Forbidden from '@/pages/Forbidden';
 import NotFound from '@/pages/NotFound';
@@ -25,6 +26,9 @@ export default function App() {
           </Route>
           <Route element={<ProtectedRoute roles={['ADMIN', 'SECRETARY']} />}>
             <Route path="dashboard/secretary" element={<SecretaryDashboard />} />
+          </Route>
+          <Route element={<ProtectedRoute roles={['DOCTOR']} />}>
+            <Route path="dashboard/doctor" element={<DoctorDashboard />} />
           </Route>
           <Route element={<ProtectedRoute roles={['PATIENT']} />}>
             <Route path="dashboard/patient" element={<PatientDashboard />} />

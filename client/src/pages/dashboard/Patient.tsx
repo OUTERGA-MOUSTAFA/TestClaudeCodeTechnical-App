@@ -109,20 +109,11 @@ export default function PatientDashboard() {
                   <Field label="Antécédents" value={profile.patient.medicalHistory ?? '—'} />
                 </Section>
                 <Section title="Contact d’urgence">
-                  <Field
-                    label="Nom"
-                    value={profile.patient.emergencyContactName ?? '—'}
-                  />
-                  <Field
-                    label="Téléphone"
-                    value={profile.patient.emergencyContactPhone ?? '—'}
-                  />
+                  <Field label="Nom" value={profile.patient.emergencyContactName ?? '—'} />
+                  <Field label="Téléphone" value={profile.patient.emergencyContactPhone ?? '—'} />
                 </Section>
                 <Section title="Assurance">
-                  <Field
-                    label="Organisme"
-                    value={profile.patient.insuranceProvider ?? '—'}
-                  />
+                  <Field label="Organisme" value={profile.patient.insuranceProvider ?? '—'} />
                   <Field label="N°" value={profile.patient.insuranceNumber ?? '—'} />
                 </Section>
               </dl>
@@ -208,9 +199,7 @@ export default function PatientDashboard() {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="space-y-1">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        {title}
-      </p>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{title}</p>
       <div className="space-y-1">{children}</div>
     </div>
   );

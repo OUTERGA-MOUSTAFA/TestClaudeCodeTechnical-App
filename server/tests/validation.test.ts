@@ -22,9 +22,14 @@ describe('Enum schemas', () => {
     expect(GenderSchema.parse('OTHER')).toBe('OTHER');
     expect(() => GenderSchema.parse('male')).toThrow();
   });
-  it('AppointmentStatusSchema accepts SCHEDULED/COMPLETED/CANCELLED/NO_SHOW', () => {
+  it('AppointmentStatusSchema accepts PENDING/SCHEDULED/COMPLETED/CANCELLED/NO_SHOW', () => {
+    expect(AppointmentStatusSchema.parse('PENDING')).toBe('PENDING');
     expect(AppointmentStatusSchema.parse('NO_SHOW')).toBe('NO_SHOW');
-    expect(() => AppointmentStatusSchema.parse('PENDING')).toThrow();
+    expect(() => AppointmentStatusSchema.parse('UNKNOWN')).toThrow();
+  });
+
+  it('RoleSchema accepts DOCTOR', () => {
+    expect(RoleSchema.parse('DOCTOR')).toBe('DOCTOR');
   });
 });
 

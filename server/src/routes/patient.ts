@@ -1,9 +1,5 @@
 import { Router } from 'express';
-import {
-  IdParamsSchema,
-  PaginationQuerySchema,
-  PatientBookingInputSchema,
-} from '@hc/shared';
+import { IdParamsSchema, PaginationQuerySchema, PatientBookingInputSchema } from '@hc/shared';
 import { prisma } from '../prisma.js';
 import { HttpError } from '../errors.js';
 import { validate } from '../validate.js';

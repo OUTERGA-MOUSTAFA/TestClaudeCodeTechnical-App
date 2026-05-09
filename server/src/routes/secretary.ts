@@ -439,37 +439,41 @@ secretaryRouter.get('/doctors/:id', validate('params', IdParamsSchema), async (r
   }
 });
 
-secretaryRouter.post('/doctors', validate('body', CreateDoctorInputSchema), async (req, res, next) => {
-  try {
-    const body = req.body as import('@hc/shared').CreateDoctorInput;
-    const exists = await prisma.user.findUnique({ where: { email: body.email } });
-    if (exists) throw new HttpError(409, 'Email already in use');
-    const dup = await prisma.doctor.findUnique({ where: { licenseNumber: body.licenseNumber } });
-    if (dup) throw new HttpError(409, 'License number already in use');
-    const passwordHash = await hashPassword(body.password);
-    const user = await prisma.user.create({
-      data: {
-        email: body.email,
-        passwordHash,
-        firstName: body.firstName,
-        lastName: body.lastName,
-        role: 'DOCTOR',
-        doctor: {
-          create: {
-            specialty: body.specialty,
-            licenseNumber: body.licenseNumber,
-            phone: body.phone,
-            bio: body.bio,
+secretaryRouter.post(
+  '/doctors',
+  validate('body', CreateDoctorInputSchema),
+  async (req, res, next) => {
+    try {
+      const body = req.body as import('@hc/shared').CreateDoctorInput;
+      const exists = await prisma.user.findUnique({ where: { email: body.email } });
+      if (exists) throw new HttpError(409, 'Email already in use');
+      const dup = await prisma.doctor.findUnique({ where: { licenseNumber: body.licenseNumber } });
+      if (dup) throw new HttpError(409, 'License number already in use');
+      const passwordHash = await hashPassword(body.password);
+      const user = await prisma.user.create({
+        data: {
+          email: body.email,
+          passwordHash,
+          firstName: body.firstName,
+          lastName: body.lastName,
+          role: 'DOCTOR',
+          doctor: {
+            create: {
+              specialty: body.specialty,
+              licenseNumber: body.licenseNumber,
+              phone: body.phone,
+              bio: body.bio,
+            },
           },
         },
-      },
-      include: { doctor: true },
-    });
-    res.status(201).json(user.doctor);
-  } catch (e) {
-    next(e);
-  }
-});
+        include: { doctor: true },
+      });
+      res.status(201).json(user.doctor);
+    } catch (e) {
+      next(e);
+    }
+  },
+);
 
 secretaryRouter.patch(
   '/doctors/:id',

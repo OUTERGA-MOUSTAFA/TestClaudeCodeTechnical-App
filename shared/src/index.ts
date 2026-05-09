@@ -106,6 +106,10 @@ export const PatientSchema = z.object({
   bloodType: z.string().nullable(),
   allergies: z.string().nullable(),
   medicalHistory: z.string().nullable(),
+  emergencyContactName: z.string().nullable(),
+  emergencyContactPhone: z.string().nullable(),
+  insuranceProvider: z.string().nullable(),
+  insuranceNumber: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -123,6 +127,10 @@ export const CreatePatientInputSchema = z.object({
   bloodType: z.string().max(10).optional(),
   allergies: z.string().max(2000).optional(),
   medicalHistory: z.string().max(5000).optional(),
+  emergencyContactName: z.string().max(200).optional(),
+  emergencyContactPhone: z.string().max(30).optional(),
+  insuranceProvider: z.string().max(200).optional(),
+  insuranceNumber: z.string().max(100).optional(),
 });
 export type CreatePatientInput = z.infer<typeof CreatePatientInputSchema>;
 
@@ -137,6 +145,10 @@ export const UpdatePatientInputSchema = z
     bloodType: z.string().max(10).nullable(),
     allergies: z.string().max(2000).nullable(),
     medicalHistory: z.string().max(5000).nullable(),
+    emergencyContactName: z.string().max(200).nullable(),
+    emergencyContactPhone: z.string().max(30).nullable(),
+    insuranceProvider: z.string().max(200).nullable(),
+    insuranceNumber: z.string().max(100).nullable(),
   })
   .partial();
 export type UpdatePatientInput = z.infer<typeof UpdatePatientInputSchema>;

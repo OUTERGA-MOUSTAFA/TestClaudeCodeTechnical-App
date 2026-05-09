@@ -47,17 +47,21 @@ model User {
 }
 
 model Patient {
-  id              String   @id @default(uuid())
-  userId          String   @unique @map("user_id")
-  dateOfBirth     DateTime @map("date_of_birth")
-  gender          Gender
-  phone           String?
-  address         String?
-  bloodType       String?  @map("blood_type")
-  allergies       String?
-  medicalHistory  String?  @map("medical_history")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                    String   @id @default(uuid())
+  userId                String   @unique @map("user_id")
+  dateOfBirth           DateTime @map("date_of_birth")
+  gender                Gender
+  phone                 String?
+  address               String?
+  bloodType             String?  @map("blood_type")
+  allergies             String?
+  medicalHistory        String?  @map("medical_history")
+  emergencyContactName  String?  @map("emergency_contact_name")
+  emergencyContactPhone String?  @map("emergency_contact_phone")
+  insuranceProvider     String?  @map("insurance_provider")
+  insuranceNumber       String?  @map("insurance_number")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   appointments   Appointment[]

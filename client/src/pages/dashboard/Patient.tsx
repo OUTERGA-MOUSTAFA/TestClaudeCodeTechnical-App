@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarCheck, FileText, UserRound } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
@@ -14,8 +14,14 @@ interface Profile {
     dateOfBirth: string;
     gender: string;
     phone: string | null;
+    address: string | null;
     bloodType: string | null;
     allergies: string | null;
+    medicalHistory: string | null;
+    emergencyContactName: string | null;
+    emergencyContactPhone: string | null;
+    insuranceProvider: string | null;
+    insuranceNumber: string | null;
   };
 }
 
@@ -85,19 +91,40 @@ export default function PatientDashboard() {
             {!profile ? (
               <Skeleton className="h-32 w-full" />
             ) : (
-              <dl className="space-y-2 text-sm">
-                <Field label="Nom" value={`${profile.firstName} ${profile.lastName}`} />
-                <Field label="Email" value={profile.email} />
-                <Field
-                  label="Date de naissance"
-                  value={new Date(profile.patient.dateOfBirth).toLocaleDateString('fr-FR')}
-                />
-                <Field label="Genre" value={profile.patient.gender} />
-                <Field label="Téléphone" value={profile.patient.phone ?? '—'} />
-                <Field label="Groupe sanguin" value={profile.patient.bloodType ?? '—'} />
-                {profile.patient.allergies && (
-                  <Field label="Allergies" value={profile.patient.allergies} />
-                )}
+              <dl className="space-y-3 text-sm">
+                <Section title="Identité">
+                  <Field label="Nom" value={`${profile.firstName} ${profile.lastName}`} />
+                  <Field label="Email" value={profile.email} />
+                  <Field
+                    label="Date de naissance"
+                    value={new Date(profile.patient.dateOfBirth).toLocaleDateString('fr-FR')}
+                  />
+                  <Field label="Genre" value={profile.patient.gender} />
+                  <Field label="Téléphone" value={profile.patient.phone ?? '—'} />
+                  <Field label="Adresse" value={profile.patient.address ?? '—'} />
+                </Section>
+                <Section title="Santé">
+                  <Field label="Groupe sanguin" value={profile.patient.bloodType ?? '—'} />
+                  <Field label="Allergies" value={profile.patient.allergies ?? '—'} />
+                  <Field label="Antécédents" value={profile.patient.medicalHistory ?? '—'} />
+                </Section>
+                <Section title="Contact d’urgence">
+                  <Field
+                    label="Nom"
+                    value={profile.patient.emergencyContactName ?? '—'}
+                  />
+                  <Field
+                    label="Téléphone"
+                    value={profile.patient.emergencyContactPhone ?? '—'}
+                  />
+                </Section>
+                <Section title="Assurance">
+                  <Field
+                    label="Organisme"
+                    value={profile.patient.insuranceProvider ?? '—'}
+                  />
+                  <Field label="N°" value={profile.patient.insuranceNumber ?? '—'} />
+                </Section>
               </dl>
             )}
           </CardContent>
@@ -178,11 +205,22 @@ export default function PatientDashboard() {
   );
 }
 
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        {title}
+      </p>
+      <div className="space-y-1">{children}</div>
+    </div>
+  );
+}
+
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-4">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium text-right">{value}</dd>
+      <dd className="font-medium text-right break-words">{value}</dd>
     </div>
   );
 }

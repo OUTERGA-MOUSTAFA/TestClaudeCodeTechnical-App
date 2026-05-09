@@ -4,12 +4,12 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-const accounts = [
+const staff = [
   {
     email: 'admin@clinique.ma',
     password: 'Admin123!',
     firstName: 'Hassan',
-    lastName: 'Admin',
+    lastName: 'El Amrani',
     role: 'ADMIN' as const,
   },
   {
@@ -21,18 +21,30 @@ const accounts = [
   },
 ];
 
-const doctorAccount = {
-  email: 'dr.alaoui@clinique.ma',
-  password: 'Doctor123!',
-  firstName: 'Karim',
-  lastName: 'Alaoui',
-  specialty: 'Médecine Générale',
-  licenseNumber: 'LIC-2026-0001',
-  phone: '+212600000001',
-  bio: '15 ans d’expérience en médecine générale.',
-};
+const doctors = [
+  {
+    email: 'dr.alaoui@clinique.ma',
+    password: 'Doctor123!',
+    firstName: 'Karim',
+    lastName: 'Alaoui',
+    specialty: 'Médecine Générale',
+    licenseNumber: 'LIC-2026-0001',
+    phone: '+212600000001',
+    bio: '15 ans d’expérience en médecine générale.',
+  },
+  {
+    email: 'dr.tazi@clinique.ma',
+    password: 'Doctor123!',
+    firstName: 'Nadia',
+    lastName: 'Tazi',
+    specialty: 'Cardiologie',
+    licenseNumber: 'LIC-2026-0002',
+    phone: '+212600000002',
+    bio: 'Cardiologue, hôpital Ibn Sina.',
+  },
+];
 
-const patientAccounts = [
+const patients = [
   {
     email: 'patient1@clinique.ma',
     password: 'Patient123!',
@@ -41,7 +53,14 @@ const patientAccounts = [
     dateOfBirth: '1990-04-12',
     gender: 'MALE' as const,
     phone: '+212600100001',
+    address: 'Av. Mohammed V, Rabat',
     bloodType: 'O+',
+    allergies: null,
+    medicalHistory: 'Hypertension contrôlée',
+    emergencyContactName: 'Aïcha Benani',
+    emergencyContactPhone: '+212600100099',
+    insuranceProvider: 'CNSS',
+    insuranceNumber: 'CNSS-19900412-001',
   },
   {
     email: 'patient2@clinique.ma',
@@ -51,8 +70,14 @@ const patientAccounts = [
     dateOfBirth: '1995-09-23',
     gender: 'FEMALE' as const,
     phone: '+212600100002',
+    address: 'Quartier Maârif, Casablanca',
     bloodType: 'A-',
     allergies: 'Pénicilline',
+    medicalHistory: null,
+    emergencyContactName: 'Mehdi Tazi',
+    emergencyContactPhone: '+212600100098',
+    insuranceProvider: 'CNOPS',
+    insuranceNumber: 'CNOPS-19950923-002',
   },
   {
     email: 'patient3@clinique.ma',
@@ -62,40 +87,59 @@ const patientAccounts = [
     dateOfBirth: '1985-12-01',
     gender: 'MALE' as const,
     phone: '+212600100003',
+    address: 'Av. Hassan II, Marrakech',
     bloodType: 'B+',
+    allergies: null,
+    medicalHistory: 'Asthme léger',
+    emergencyContactName: 'Khadija Idrissi',
+    emergencyContactPhone: '+212600100097',
+    insuranceProvider: 'AXA Assurance',
+    insuranceNumber: 'AXA-19851201-003',
   },
 ];
 
-async function upsertAdminLike(a: (typeof accounts)[number]): Promise<void> {
+async function upsertStaff(s: (typeof staff)[number]): Promise<void> {
   await prisma.user.upsert({
-    where: { email: a.email },
-    update: { firstName: a.firstName, lastName: a.lastName, role: a.role, isActive: true },
+    where: { email: s.email },
+    update: { firstName: s.firstName, lastName: s.lastName, role: s.role, isActive: true },
     create: {
-      email: a.email,
-      passwordHash: await bcrypt.hash(a.password, 10),
-      firstName: a.firstName,
-      lastName: a.lastName,
-      role: a.role,
+      email: s.email,
+      passwordHash: await bcrypt.hash(s.password, 10),
+      firstName: s.firstName,
+      lastName: s.lastName,
+      role: s.role,
     },
   });
 }
 
-async function upsertDoctor(): Promise<{ id: string }> {
+async function upsertDoctor(d: (typeof doctors)[number]): Promise<{ id: string }> {
   const user = await prisma.user.upsert({
-    where: { email: doctorAccount.email },
-    update: { firstName: doctorAccount.firstName, lastName: doctorAccount.lastName },
+    where: { email: d.email },
+    update: {
+      firstName: d.firstName,
+      lastName: d.lastName,
+      role: 'DOCTOR',
+      doctor: {
+        update: {
+          specialty: d.specialty,
+          licenseNumber: d.licenseNumber,
+          phone: d.phone,
+          bio: d.bio,
+        },
+      },
+    },
     create: {
-      email: doctorAccount.email,
-      passwordHash: await bcrypt.hash(doctorAccount.password, 10),
-      firstName: doctorAccount.firstName,
-      lastName: doctorAccount.lastName,
-      role: 'PATIENT',
+      email: d.email,
+      passwordHash: await bcrypt.hash(d.password, 10),
+      firstName: d.firstName,
+      lastName: d.lastName,
+      role: 'DOCTOR',
       doctor: {
         create: {
-          specialty: doctorAccount.specialty,
-          licenseNumber: doctorAccount.licenseNumber,
-          phone: doctorAccount.phone,
-          bio: doctorAccount.bio,
+          specialty: d.specialty,
+          licenseNumber: d.licenseNumber,
+          phone: d.phone,
+          bio: d.bio,
         },
       },
     },
@@ -104,10 +148,29 @@ async function upsertDoctor(): Promise<{ id: string }> {
   return { id: user.doctor!.id };
 }
 
-async function upsertPatient(p: (typeof patientAccounts)[number]): Promise<{ id: string }> {
+async function upsertPatient(p: (typeof patients)[number]): Promise<{ id: string }> {
   const user = await prisma.user.upsert({
     where: { email: p.email },
-    update: { firstName: p.firstName, lastName: p.lastName },
+    update: {
+      firstName: p.firstName,
+      lastName: p.lastName,
+      role: 'PATIENT',
+      patient: {
+        update: {
+          dateOfBirth: new Date(p.dateOfBirth),
+          gender: p.gender,
+          phone: p.phone,
+          address: p.address,
+          bloodType: p.bloodType,
+          allergies: p.allergies,
+          medicalHistory: p.medicalHistory,
+          emergencyContactName: p.emergencyContactName,
+          emergencyContactPhone: p.emergencyContactPhone,
+          insuranceProvider: p.insuranceProvider,
+          insuranceNumber: p.insuranceNumber,
+        },
+      },
+    },
     create: {
       email: p.email,
       passwordHash: await bcrypt.hash(p.password, 10),
@@ -119,8 +182,14 @@ async function upsertPatient(p: (typeof patientAccounts)[number]): Promise<{ id:
           dateOfBirth: new Date(p.dateOfBirth),
           gender: p.gender,
           phone: p.phone,
+          address: p.address,
           bloodType: p.bloodType,
-          allergies: 'allergies' in p ? p.allergies : undefined,
+          allergies: p.allergies,
+          medicalHistory: p.medicalHistory,
+          emergencyContactName: p.emergencyContactName,
+          emergencyContactPhone: p.emergencyContactPhone,
+          insuranceProvider: p.insuranceProvider,
+          insuranceNumber: p.insuranceNumber,
         },
       },
     },
@@ -130,25 +199,29 @@ async function upsertPatient(p: (typeof patientAccounts)[number]): Promise<{ id:
 }
 
 async function main(): Promise<void> {
-  for (const a of accounts) await upsertAdminLike(a);
-  const doctor = await upsertDoctor();
+  for (const s of staff) await upsertStaff(s);
 
-  const patients: Array<{ id: string }> = [];
-  for (const p of patientAccounts) patients.push(await upsertPatient(p));
+  const seededDoctors: Array<{ id: string }> = [];
+  for (const d of doctors) seededDoctors.push(await upsertDoctor(d));
 
-  for (let i = 0; i < patients.length; i++) {
-    const p = patients[i]!;
+  const seededPatients: Array<{ id: string }> = [];
+  for (const p of patients) seededPatients.push(await upsertPatient(p));
+
+  for (let i = 0; i < seededPatients.length; i++) {
+    const p = seededPatients[i]!;
+    const d = seededDoctors[i % seededDoctors.length]!;
     const existing = await prisma.appointment.findFirst({
-      where: { patientId: p.id, doctorId: doctor.id, status: 'SCHEDULED' },
+      where: { patientId: p.id, doctorId: d.id },
     });
     if (!existing) {
       await prisma.appointment.create({
         data: {
           patientId: p.id,
-          doctorId: doctor.id,
+          doctorId: d.id,
           scheduledAt: new Date(Date.now() + (i + 1) * 24 * 60 * 60 * 1000),
           durationMinutes: 30,
           reason: i === 0 ? 'Consultation annuelle' : i === 1 ? 'Suivi traitement' : 'Bilan',
+          status: i === 0 ? 'SCHEDULED' : 'PENDING',
         },
       });
     }
